@@ -169,7 +169,8 @@ export function simulateMicrostructure(
         
         // Algos pull orders (liquidity evaporating)
         bidDepth = Math.max(2, baseLiquidity * Math.exp(-elapsed * 0.1));
-        askDepth = baseLiquidity * (0.5 + Math.random() * 0.5); // asymmetric depth
+        const detFactor = ((t * 9301 + 49297) % 233280) / 233280;
+        askDepth = baseLiquidity * (0.5 + detFactor * 0.5); // deterministic asymmetric depth
         
         // Extreme negative delta price change
         const crashDrift = -0.15 * (1 + elapsed * 0.04) * (1 + hftRate * 1.5);

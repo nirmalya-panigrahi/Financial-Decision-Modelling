@@ -5,6 +5,7 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
+    base: '/Financial-Decision-Modelling/',
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {

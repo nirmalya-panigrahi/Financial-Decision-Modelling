@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ArrowRight, CheckCircle2, Cpu, Layers, TrendingUp } from 'lucide-react';
 import {
   ExecutiveScenario,
@@ -6,6 +6,7 @@ import {
   ScenarioDomain,
 } from '../types';
 import { CrisisLogoSvg } from './ThemeVisuals';
+import HeroModelDiagrams, { HeroFilterDomain } from './HeroModelDiagrams';
 
 interface CaseListViewProps {
   scenarios: ExecutiveScenario[];
@@ -44,7 +45,18 @@ export default function CaseListView({
   completions,
   onSelectScenario,
 }: CaseListViewProps) {
+  const [activeFilter, setActiveFilter] = useState<HeroFilterDomain>('all');
   const completedCount = Object.values(completions).filter((c) => c.passed).length;
+
+  const handleQuickLaunch = () => {
+    const nextUnfinished = scenarios.find((s) => !completions[s.id]?.passed);
+    onSelectScenario((nextUnfinished || scenarios[0]).id);
+  };
+
+  const visibleDomains =
+    activeFilter === 'all'
+      ? DOMAIN_META
+      : DOMAIN_META.filter((d) => d.domain === activeFilter);
 
   return (
     <div className="min-h-screen bg-[#020617] text-slate-100 theme-texture-grid flex flex-col">
@@ -73,21 +85,46 @@ export default function CaseListView({
 
       {/* Main Content */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-10 space-y-10">
-        <section className="max-w-3xl space-y-3">
-          <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-emerald-400">
-            CASE ARCHIVE · 9 DETERMINISTIC CRISIS SCENARIOS
-          </p>
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white text-balance">
-            Step Into the Command Chair Across a Century of Financial Crises
-          </h2>
-          <p className="text-sm text-slate-400 leading-relaxed">
-            Select a historical or future case below. Every scenario runs in a period-accurate executive environment powered by deterministic non-linear chaos solvers across five unfolding stages. Weigh conflicting departmental briefs, analyze directive impact, and contain systemic contagion.
-          </p>
+        <section className="space-y-8">
+          <div className="max-w-3xl space-y-3">
+            <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-emerald-400">
+              CASE ARCHIVE · 9 DETERMINISTIC CRISIS SCENARIOS
+            </p>
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white text-balance">
+              Step Into the Command Chair Across a Century of Financial Crises
+            </h2>
+            <p className="text-sm text-slate-400 leading-relaxed">
+              Select a historical or future case below. Every scenario runs in a period-accurate executive environment powered by deterministic non-linear chaos solvers across five unfolding stages. Weigh conflicting departmental briefs, analyze directive impact, and contain systemic contagion.
+            </p>
+          </div>
+
+          {/* 4-Card Technical Model Diagrams */}
+          <HeroModelDiagrams
+            activeFilter={activeFilter}
+            onSelectFilter={setActiveFilter}
+            onQuickLaunch={handleQuickLaunch}
+          />
         </section>
+
+        {/* Filter Status Bar */}
+        {activeFilter !== 'all' && (
+          <div className="flex items-center justify-between gap-4 px-4 py-2.5 rounded-lg bg-[#0b1120] border border-slate-800 text-xs font-mono">
+            <span className="text-slate-300">
+              Filtered by domain: <strong className="text-blue-400">{DOMAIN_META.find((d) => d.domain === activeFilter)?.label}</strong>
+            </span>
+            <button
+              type="button"
+              onClick={() => setActiveFilter('all')}
+              className="text-emerald-400 hover:text-emerald-300 font-semibold cursor-pointer"
+            >
+              Show All 9 Cases
+            </button>
+          </div>
+        )}
 
         {/* Grouped by Domain */}
         <div className="space-y-10">
-          {DOMAIN_META.map((group) => {
+          {visibleDomains.map((group) => {
             const Icon = group.icon;
             const groupScenarios = scenarios.filter((s) => s.domain === group.domain);
 
